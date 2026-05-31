@@ -3,8 +3,6 @@ import matplotlib.pyplot as plt
 import argparse
 import sys
 
-DEFAULT_FIELDS = ["Series Description", "Study Description"]
-
 def _normalize(s):
     return s.lower().replace(" ", "").replace("_", "")
 
@@ -48,6 +46,7 @@ def display_dicom(file_path, fields):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Display a DICOM image file.")
     parser.add_argument("filename", help="Path to the .dcm file you want to view")
+    DEFAULT_FIELDS = ["Series Description", "Study Description"]
     parser.add_argument(
         "--fields", "-f",
         nargs="+",
