@@ -1,5 +1,5 @@
 import os
-import subprocess
+from pydicom.misc import is_dicom
 
 
 def find_dicom_files(directory):
@@ -7,20 +7,14 @@ def find_dicom_files(directory):
 
     Paths are relative to directory (not including directory itself),
     suitable for use as arguments from the working directory.
-    Uses the Linux `file` command to detect DICOM files.
     """
     results = []
     for root, _, files in os.walk(directory):
         for name in files:
             full_path = os.path.join(root, name)
             try:
-                result = subprocess.run(
-                    ["file", full_path],
-                    capture_output=True,
-                    text=True,
-                )
-                if "DICOM" in result.stdout:
+                if is_dicom(full_path):
                     results.append(os.path.relpath(full_path, directory))
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Error checking '{full_path}': {e}")
     return results
