@@ -2,8 +2,6 @@ import os
 import pydicom
 from pydicom.misc import is_dicom
 
-DEFAULT_METADATA = [('Series Description', ('L Spine LAT', 'L Spine EXT'))]
-
 def _normalize(s):
     return s.lower().replace(" ", "").replace("_", "")
 
@@ -14,7 +12,7 @@ def find_metadata(ds, field_name):
             return elem.name, str(elem.value)
     return field_name, None
 
-def find_dicom_files(directory, metadata=DEFAULT_METADATA):
+def find_dicom_files(directory, metadata=[]):
     """Return list of DICOM file paths found under directory.
 
     Paths are relative to directory (not including directory itself),
