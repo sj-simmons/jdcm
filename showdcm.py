@@ -3,30 +3,60 @@ import matplotlib.pyplot as plt
 import argparse
 import sys
 
-def display_dicom(file_path):
-    """Reads and displays a DICOM image from a given file path."""
+DEFAULT_FIELDS = ["Series Description", "Study Description"]
+
+def _normalize(s):
+    return s.lower().replace(" ", "").replace("_", "")
+
+def find_metadata(ds, field_name):
+    normalized = _normalize(field_name)
+    for elem in ds:
+        if _normalize(elem.keyword) == normalized or _normalize(elem.name) == normalized:
+            return elem.name, str(elem.value)
+    return field_name, None
+
+def display_dicom(file_path, fields):
     try:
-        # Load the dataset
         ds = pydicom.dcmread(file_path)
 
-        # Display the pixel data
-        plt.imshow(ds.pixel_array, cmap=plt.cm.bone)
-        plt.title(f"DICOM: {file_path}")
-        plt.axis('off')
+        metadata_lines = []
+        for field in fields:
+            name, value = find_metadata(ds, field)
+            metadata_lines.append(f"{name}: {value}" if value is not None else f"{field}: (not found)")
+
+        fig, ax = plt.subplots()
+        ax.imshow(ds.pixel_array, cmap=plt.cm.bone)
+        ax.set_title(f"DICOM: {file_path}")
+        ax.axis("off")
+
+        if metadata_lines:
+            fig.text(
+                0.01, 0.01,
+                "\n".join(metadata_lines),
+                fontsize=8,
+                verticalalignment="bottom",
+                color="white",
+                bbox=dict(boxstyle="round", facecolor="black", alpha=0.6),
+            )
+
+        plt.tight_layout()
         plt.show()
 
     except Exception as e:
         print(f"Error: Could not read file '{file_path}'. {e}")
 
 if __name__ == "__main__":
-    # 1. Setup the argument parser
     parser = argparse.ArgumentParser(description="Display a DICOM image file.")
-
-    # 2. Add a positional argument for the file path
     parser.add_argument("filename", help="Path to the .dcm file you want to view")
-
-    # 3. Parse the command line arguments
+    parser.add_argument(
+        "--fields", "-f",
+        nargs="+",
+        default=DEFAULT_FIELDS,
+        metavar="FIELD",
+        help=(
+            "Metadata field names to display (case-insensitive). "
+            f"Default: {DEFAULT_FIELDS}"
+        ),
+    )
     args = parser.parse_args()
-
-    # 4. Call the function with the provided filename
-    display_dicom(args.filename)
+    display_dicom(args.filename, args.fields)
