@@ -4,17 +4,7 @@ import matplotlib.pyplot as plt
 import argparse
 import sys
 
-from lib import find_dicom_files
-
-def _normalize(s):
-    return s.lower().replace(" ", "").replace("_", "")
-
-def find_metadata(ds, field_name):
-    normalized = _normalize(field_name)
-    for elem in ds:
-        if _normalize(elem.keyword) == normalized or _normalize(elem.name) == normalized:
-            return elem.name, str(elem.value)
-    return field_name, None
+from lib import find_dicom_files, find_metadata
 
 def display_dicom(file_path, fields):
     try:
