@@ -6,7 +6,17 @@ import sys
 
 from lib import find_dicom_files, find_metadata
 
+
 def display_dicom(file_path, fields):
+    """Display a single DICOM image with selected metadata overlaid.
+
+    Opens a matplotlib window showing the image with a bone colormap and
+    a metadata box in the lower-left corner.
+
+    Args:
+        file_path: Path to the DICOM file.
+        fields:    List of metadata field names to display on the image.
+    """
     try:
         ds = pydicom.dcmread(file_path)
 
@@ -36,12 +46,27 @@ def display_dicom(file_path, fields):
     except Exception as e:
         print(f"Error: Could not read file '{file_path}'. {e}")
 
+
 def browse_dicoms(file_paths, fields):
+    """Display a list of DICOM images in a single window with arrow-key navigation.
+
+    Left/right arrow keys step through the list. Navigation stops at the
+    first and last image (no wrap-around).
+
+    Args:
+        file_paths: List of paths to DICOM files.
+        fields:     List of metadata field names to display on each image.
+    """
     state = {"index": 0}
 
     fig, ax = plt.subplots()
 
     def render(index):
+        """Load and draw the DICOM at the given index.
+
+        Args:
+            index: Position in file_paths to display.
+        """
         file_path = file_paths[index]
         try:
             ds = pydicom.dcmread(file_path)
@@ -75,6 +100,11 @@ def browse_dicoms(file_paths, fields):
             print(f"Error: Could not read file '{file_path}'. {e}")
 
     def on_key(event):
+        """Handle left/right arrow key presses to navigate between images.
+
+        Args:
+            event: matplotlib key press event.
+        """
         if event.key == "right" and state["index"] < len(file_paths) - 1:
             state["index"] += 1
             render(state["index"])
@@ -86,6 +116,7 @@ def browse_dicoms(file_paths, fields):
     render(0)
     plt.tight_layout()
     plt.show()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Display a DICOM image file.")

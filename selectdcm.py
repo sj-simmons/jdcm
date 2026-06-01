@@ -4,13 +4,26 @@ import shutil
 
 from lib import find_dicom_files
 
-#DEFAULT_METADATA = [('Series Description', ('L Spine LAT', 'L Spine EXT'))]
-DEFAULT_METADATA = [('Series Description', ('L Spine LAT',))]
+DEFAULT_METADATA = [('Series Description', ('L Spine LAT', 'L Spine EXT'))]
+#DEFAULT_METADATA = [('Series Description', ('L Spine LAT',))]
+
 
 def make_dest_name(path):
+    """Convert a relative DICOM path into a flat destination filename.
+
+    Removes all path separators and dashes, substitutes 'POST-OP'/'PRE-OP'
+    (after dash removal) with lowercase equivalents, and appends '.dcm'.
+
+    Args:
+        path: Relative file path as returned by find_dicom_files.
+
+    Returns:
+        Flat filename string ending in '.dcm'.
+    """
     name = path.replace("/", "").replace("\\", "").replace("-", "")
     name = name.replace("POSTOP", "postop").replace("PREOP", "preop")
     return name + ".dcm"
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
